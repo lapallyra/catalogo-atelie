@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut } from 'firebase/auth';
 import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import firebaseConfig from '../../firebase-applet-config.json';
@@ -26,7 +26,18 @@ export const login = async () => {
       console.log('[Auth] Login popup closed by user.');
       return;
     }
-    throw error; // Re-throw to be handled by caller
+    // Check if we are in an iframe or if popup is blocked
+    if (error.code === 'auth/popup-blocked') {
+      console.log('[Auth] Popup blocked, suggesting redirect login');
+      throw error; 
+    }
+    throw error; 
   }
 };
+
+export const loginWithRedirect = () => {
+  console.log('[Auth] Attempting login with redirect');
+  return signInWithRedirect(auth, googleProvider);
+};
+
 export const logout = () => signOut(auth);

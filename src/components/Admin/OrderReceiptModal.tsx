@@ -12,7 +12,7 @@ interface OrderReceiptModalProps {
 
 export const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({ order, onClose }) => {
   const [settings, setSettings] = useState<Partial<SiteSettings>>({});
-  const [receiptType, setReceiptType] = useState<'receipt' | 'coupon' | 'budget'>('receipt');
+  const [receiptType, setReceiptType] = useState<'receipt' | 'coupon'>('receipt');
 
   useEffect(() => {
     const load = async () => {
@@ -35,12 +35,12 @@ export const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({ order, onC
   const studioName = settings.store_name || atelierNames[order.companyId] || "Ateliê";
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm print:p-0 print:bg-transparent">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm print:p-0 print:bg-transparent overflow-y-auto">
       {/* Printable Area */}
-      <div className="bg-white w-full max-w-lg max-h-[90vh] rounded-[2rem] shadow-2xl overflow-y-auto scrollbar-hide flex flex-col relative print:shadow-none print:max-h-none print:w-full print:rounded-none">
+      <div className="bg-white w-full max-w-4xl max-h-[90vh] md:max-h-[95vh] rounded-[2rem] shadow-2xl overflow-y-auto scrollbar-hide flex flex-col relative print:shadow-none print:max-h-none print:w-full print:rounded-none my-auto">
         
         {/* Header - Not Printed */}
-        <div className="p-6 border-b border-gray-100 flex justify-between items-center print:hidden bg-white">
+        <div className="p-6 border-b border-gray-100 flex justify-between items-center print:hidden bg-white sticky top-0 z-10">
           <div className="flex gap-2">
             <button 
               onClick={() => setReceiptType('receipt')}
@@ -53,12 +53,6 @@ export const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({ order, onC
               className={`px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${receiptType === 'coupon' ? 'bg-black text-white' : 'bg-gray-100 text-gray-400 hover:text-black'}`}
             >
               CUPOM
-            </button>
-            <button 
-              onClick={() => setReceiptType('budget')}
-              className={`px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${receiptType === 'budget' ? 'bg-black text-white' : 'bg-gray-100 text-gray-400 hover:text-black'}`}
-            >
-              ORÇAMENTO/OS
             </button>
           </div>
           <div className="flex gap-2">
@@ -74,8 +68,10 @@ export const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({ order, onC
               <X size={20} />
             </button>
           </div>
-        </div>        {/* The Receipt Content - Elegant A4 Style */}
-        <div id="printable-receipt" className="p-12 font-sans text-black bg-white w-[210mm] min-h-[297mm] mx-auto print:p-0 print:w-full">
+        </div>
+
+        {/* The Receipt Content - Elegant A4 Style */}
+        <div id="printable-receipt" className="p-8 md:p-12 font-sans text-black bg-white w-full max-w-[210mm] mx-auto print:p-0 print:m-0 print:max-w-none">
           {/* Header */}
           <div className="flex justify-between items-start mb-12">
             <div>
@@ -159,18 +155,23 @@ export const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({ order, onC
 
       <style dangerouslySetInnerHTML={{ __html: `
         @media print {
-          body * { visibility: hidden; }
-          #printable-receipt, #printable-receipt * { visibility: visible; }
+          /* Hide everything except the printable receipt */
+          body > :not(.fixed) { display: none !important; }
+          .fixed > :not(.bg-white) { display: none !important; }
+          .fixed { position: static !important; inset: auto !important; width: 100% !important; background: transparent !important; }
+          .fixed .bg-white { position: static !important; width: 100% !important; max-width: none !important; height: auto !important; max-height: none !important; margin: 0 !important; box-shadow: none !important; border: none !important; border-radius: 0 !important; }
+          .print\:hidden { display: none !important; }
+          
           #printable-receipt {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            margin: 0;
-            padding: 20px;
+            visibility: visible !important;
+            display: block !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            width: 100% !important;
           }
+          
           @page {
-            margin: 0;
+            margin: 10mm;
             size: auto;
           }
         }

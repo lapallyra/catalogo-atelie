@@ -82,58 +82,84 @@ export const AgendaTab: React.FC<AgendaTabProps> = ({ orders, onSelectOrder }) =
               </button>
             </div>
           </div>
-
           <div className="grid grid-cols-7 gap-px bg-lilac/20 rounded-3xl overflow-hidden border border-lilac/20 shadow-xl">
             {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(d => (
               <div key={d} className="bg-white p-4 text-center text-[10px] font-black uppercase tracking-widest text-black">{d}</div>
             ))}
-            {days.map((day, i) => {
-              const dayOrders = filteredOrders.filter(o => {
-                if (!o.deliveryDate) return false;
-                const endD = new Date(o.deliveryDate + 'T12:00:00');
-                if (isNaN(endD.getTime())) return false;
-                
-                let startD = endD;
-                if (o.createdAt) {
-                   startD = o.createdAt.toDate ? o.createdAt.toDate() : new Date(o.createdAt);
-                }
-                startD.setHours(0,0,0,0);
-                
-                // Check if day is between startD and endD (inclusive, day is at 00:00)
-                return day.getTime() >= startD.getTime() && day.getTime() <= endD.getTime();
+            {(() => {
+              const firstDayOfWeek = monthStart.getDay();
+              const cells = [];
+              
+              // Padding for start of month
+              for (let i = 0; i < firstDayOfWeek; i++) {
+                cells.push(<div key={`empty-${i}`} className="bg-lilac/[0.02] min-h-[160px] border border-transparent" />);
+              }
+              
+              days.forEach((day) => {
+                const dayStart = new Date(day);
+                dayStart.setHours(0,0,0,0);
+                const dayEnd = new Date(day);
+                dayEnd.setHours(23,59,59,999);
+
+                const dayOrders = filteredOrders.filter(o => {
+                  if (!o.deliveryDate) return false;
+                  
+                  const deliveryDate = new Date(o.deliveryDate + 'T12:00:00');
+                  deliveryDate.setHours(23,59,59,999);
+                  
+                  let registrationDate: Date;
+                  if (o.createdAt) {
+                     const millis = (o.createdAt as any)?.toMillis?.() || (o.createdAt as any)?.seconds * 1000 || new Date(o.createdAt as any).getTime();
+                     registrationDate = new Date(millis);
+                  } else {
+                     registrationDate = deliveryDate;
+                  }
+                  registrationDate.setHours(0,0,0,0);
+                  
+                  return day.getTime() >= registrationDate.getTime() && day.getTime() <= deliveryDate.getTime();
+                }).sort((a, b) => (a.code || '').localeCompare(b.code || ''));
+
+                cells.push(
+                  <div key={day.toISOString()} className="min-h-[160px] bg-white p-1 hover:bg-lilac/5 transition-all group flex flex-col gap-0.5 border border-transparent">
+                    <span className={`text-[10px] font-black transition-colors mb-1 ml-1 ${isSameDay(day, new Date()) ? 'text-lilac' : 'text-gray-400 group-hover:text-black'}`}>
+                      {safeFormat(day, 'd')}
+                    </span>
+                    <div className="flex-1 space-y-0.5 overflow-hidden">
+                      {dayOrders.map((order, oIdx) => {
+                        const deliveryDate = new Date(order.deliveryDate + 'T12:00:00');
+                        deliveryDate.setHours(0,0,0,0);
+                        
+                        const millis = (order.createdAt as any)?.toMillis?.() || (order.createdAt as any)?.seconds * 1000 || new Date(order.createdAt as any).getTime();
+                        const registrationDate = new Date(millis);
+                        registrationDate.setHours(0,0,0,0);
+
+                        const isStart = isSameDay(day, registrationDate);
+                        const isEnd = isSameDay(day, deliveryDate);
+                        
+                        const showLabel = isStart || day.getDay() === 1; 
+                        
+                        return (
+                          <div 
+                            key={`${day.toISOString()}-${order.id}-${oIdx}`} 
+                            onClick={() => onSelectOrder?.(order.id)}
+                            className={`h-5 px-1.5 flex items-center gap-1 cursor-pointer transition-opacity hover:opacity-80 ${getOrderStyle(order.customerName)} ${isStart ? 'rounded-l-md ml-0.5' : 'border-l-0'} ${isEnd ? 'rounded-r-md mr-0.5' : 'border-r-0'} shadow-sm`}
+                            title={`${order.customerName} - ${order.code}`}
+                          >
+                             {isStart && <div className="w-1 h-1 rounded-full bg-white shrink-0" />}
+                             <span className="text-[7px] font-black uppercase text-white truncate leading-none">
+                               {showLabel ? order.customerName : '\u00A0'}
+                             </span>
+                             {isEnd && <div className="ml-auto w-1 h-1 rounded-full bg-white/50 shrink-0" />}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                );
               });
 
-              return (
-                <div key={day.toISOString()} className="min-h-[140px] bg-white p-2 hover:bg-lilac/5 transition-all group flex flex-col gap-1 border border-transparent">
-                  <span className="text-[10px] font-black text-gray-400 group-hover:text-black transition-colors mb-2">
-                    {safeFormat(day, 'd')}
-                  </span>
-                  <div className="space-y-1.5 overflow-y-auto max-h-[100px] overflow-x-visible">
-                    {dayOrders.map((order, oIdx) => {
-                      const startD = order.createdAt ? (order.createdAt.toDate ? order.createdAt.toDate() : new Date(order.createdAt)) : new Date(order.deliveryDate + 'T12:00:00');
-                      const endD = new Date(order.deliveryDate + 'T12:00:00');
-                      const isStart = isSameDay(day, startD);
-                      const isEnd = isSameDay(day, endD);
-                      const showLabel = isStart || day.getDay() === 0; // Show text on start day or Sunday
-                      
-                      return (
-                        <div 
-                          key={`${day.toISOString()}-${order.id}-${oIdx}`} 
-                          onClick={() => onSelectOrder?.(order.id)}
-                          className={`p-1 px-2 border flex items-center gap-1.5 cursor-pointer shadow-sm ${getOrderStyle(order.customerName)} ${isStart ? 'rounded-l-lg' : 'border-l-0'} ${isEnd ? 'rounded-r-lg border-r' : 'border-r-0'} ${!isStart && !isEnd ? 'rounded-none' : ''}`}
-                          title={`${order.customerName} - ${order.code} (${safeFormatISO(startD.toISOString(), 'dd/MM')} a ${safeFormatISO(endD.toISOString(), 'dd/MM')})`}
-                        >
-                           {isStart && <div className="w-1.5 h-1.5 rounded-full bg-white shrink-0" />}
-                           <span className="text-[8px] font-black uppercase text-white truncate">
-                             {showLabel ? order.customerName : '\u00A0'}
-                           </span>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              );
-            })}
+              return cells;
+            })()}
           </div>
 
           {/* Legend / Upcoming Orders in Focus */}

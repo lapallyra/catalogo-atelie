@@ -43,7 +43,6 @@ import { CatalogHeader } from './Catalog/CatalogHeader';
 import { CatalogInfoBar } from './Catalog/CatalogInfoBar';
 import { DateHighlights } from './Catalog/DateHighlights';
 import { FeaturedProductsCarousel } from './Catalog/FeaturedProductsCarousel';
-import { SearchedGiftListModal } from './SearchedGiftListModal';
 import { PriceDisplay } from './ui/PriceDisplay';
 import { subscribeToProducts, addProduct, getSiteSettings, getGiftList } from '../services/firebaseService';
 import { PRODUCTS, INITIAL_CONFIG } from '../constants';
@@ -196,6 +195,14 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
   const [isSearchingList, setIsSearchingList] = useState(false);
   const [listSearchCode, setListSearchCode] = useState('');
   const [isSearchingLoading, setIsSearchingLoading] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'gift' } | null>(null);
+
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   const handleListSearch = async () => {
     if (!listSearchCode || listSearchCode.length < 5) return;
@@ -204,9 +211,9 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
       const code = listSearchCode.trim().toUpperCase();
       const list = await getGiftList(code);
       if (list) {
-        setSearchedGiftList(list);
         setIsSearchingList(false);
         setListSearchCode('');
+        window.location.href = `/listadepresentes/${list.code}`;
       } else {
         alert("Lista não encontrada. Verifique o código.");
       }
@@ -277,14 +284,17 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
   };
 
   const handleHiddenAdminClick = () => {
-    setAdminClickCount(prev => {
-      const next = prev + 1;
-      if (next >= 5) {
-        onOpenAdmin();
-        return 0;
-      }
-      return next;
-    });
+    if (isAdmin) {
+      onOpenAdmin();
+      return;
+    }
+    const next = adminClickCount + 1;
+    if (next >= 5) {
+      onOpenAdmin();
+      setAdminClickCount(0);
+    } else {
+      setAdminClickCount(next);
+    }
   };
 
   const createSparkles = (e: React.MouseEvent) => {
@@ -576,22 +586,30 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
                           </p>
                         </div>
 
-                        <div className="flex items-center gap-2">
-                           <button 
-                              onClick={(e) => { e.stopPropagation(); onAddToCart(product, 1); }}
-                              className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 transition-colors border border-white/10"
-                              style={{ color: companyId === 'guennita' ? theme.accentColor : '#FFFFFF' }}
-                            >
-                              <ShoppingCart size={13} className="md:w-[15px] md:h-[15px]" />
-                           </button>
-                           <button 
-                              onClick={(e) => { e.stopPropagation(); onAddToGiftList(product); }}
-                              className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 transition-colors border border-white/10"
-                              style={{ color: companyId === 'guennita' ? theme.accentColor : '#FFFFFF' }}
-                            >
-                              <Gift size={13} className="md:w-[15px] md:h-[15px]" />
-                           </button>
-                        </div>
+                          <div className="flex items-center gap-2">
+                             <button 
+                                onClick={(e) => { 
+                                  e.stopPropagation(); 
+                                  onAddToCart(product, 1); 
+                                  setToast({ message: 'Adicionado ao Carrinho', type: 'success' });
+                                }}
+                                className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 transition-colors border border-white/10"
+                                style={{ color: companyId === 'guennita' ? theme.accentColor : '#FFFFFF' }}
+                              >
+                                <ShoppingCart size={13} className="md:w-[15px] md:h-[15px]" />
+                             </button>
+                             <button 
+                                onClick={(e) => { 
+                                  e.stopPropagation(); 
+                                  onAddToGiftList(product); 
+                                  setToast({ message: 'Adicionado à Lista', type: 'gift' });
+                                }}
+                                className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 transition-colors border border-white/10"
+                                style={{ color: companyId === 'guennita' ? theme.accentColor : '#FFFFFF' }}
+                              >
+                                <Gift size={13} className="md:w-[15px] md:h-[15px]" />
+                             </button>
+                          </div>
                       </div>
 
                       {/* Subtle hover indicator */}
@@ -700,32 +718,6 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
            onCloseExternal={() => setIsSuggestionOpen(false)} 
         />
 
-        {giftList.length > 0 && !isGiftListOpen && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="fixed bottom-24 right-6 md:bottom-28 md:right-10 z-[1001]"
-          >
-             <div className="bg-white/90 backdrop-blur-md border border-lilac/20 rounded-full px-4 py-2 flex items-center gap-2 shadow-sm">
-                <Gift size={12} className="text-lilac" />
-                <span className="text-[8px] font-black uppercase tracking-widest text-lilac">Lista com {giftList.length} itens</span>
-             </div>
-          </motion.div>
-        )}
-
-        <SearchedGiftListModal 
-          isOpen={searchedGiftList !== null}
-          onClose={() => setSearchedGiftList(null)}
-          giftList={searchedGiftList}
-          theme={theme}
-          onAddToCart={onAddToCart}
-          onViewProduct={(p) => {
-            setSelectedProduct(p);
-            setIsReadOnlyProduct(true);
-          }}
-          companyId={companyId}
-        />
-
         {/* List Search Overlay */}
         {isSearchingList && (
            <>
@@ -812,6 +804,28 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
             companyId={companyId}
             siteSettings={siteSettings}
           />
+        )}
+
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, x: '-50%' }}
+            animate={{ opacity: 1, y: 0, x: '-50%' }}
+            exit={{ opacity: 0, y: 50, x: '-50%' }}
+            className="fixed bottom-32 left-1/2 -translate-x-1/2 z-[5000] px-8 py-5 bg-black text-white text-xs font-black uppercase tracking-widest rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/20 flex items-center gap-4 min-w-[300px] justify-center"
+          >
+            {toast.type === 'gift' ? (
+              <div className="p-2 rounded-full bg-pink-500 text-white">
+                <Gift size={18} strokeWidth={2.5} />
+              </div>
+            ) : (
+              <div className="p-2 rounded-full bg-amber-500 text-white">
+                <ShoppingCart size={18} strokeWidth={2.5} />
+              </div>
+            )}
+            <span className="flex-1 text-center">{toast.message}</span>
+            <div className="w-8 h-px bg-white/20 mx-2" />
+            <Sparkles size={14} className="text-[#D4AF37] animate-pulse" />
+          </motion.div>
         )}
       </AnimatePresence>
 

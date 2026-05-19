@@ -10,6 +10,7 @@ import { SuccessOverlay } from './components/SuccessOverlay';
 import { SalesNotificationPortal } from './components/SalesNotificationPortal';
 import { AuthProvider } from './components/AuthProvider';
 import { DocumentSearch } from './components/DocumentSearch';
+import { GiftListView } from './components/GiftListView';
 import { CheckoutView } from './components/CheckoutView';
 import { CookieBanner } from './components/CookieBanner';
 import { SuggestionBox } from './components/SuggestionBox';
@@ -261,6 +262,9 @@ function MainApp() {
         {/* Document Search */}
         <Route path="/document" element={<DocumentSearch onGoBack={() => window.history.back()} />} />
         
+        {/* Gift List View */}
+        <Route path="/listadepresentes/:code" element={<GiftListView setCarts={setCarts} config={config} />} />
+
         {/* Full-Page Checkout */}
         <Route path="/checkout" element={<CheckoutPageWrapper carts={carts} setCarts={setCarts} config={config} />} />
       </Routes>

@@ -26,7 +26,7 @@ import {
   MoreVertical,
   X
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { commemorativeDateService } from '../../services/commemorativeDateService';
 import { CommemorativeDate, CategoryId } from '../../types';
 import { format, isToday, isTomorrow, isSameMonth, isAfter, isBefore, addDays, startOfToday, endOfToday, startOfMonth, endOfMonth } from 'date-fns';
@@ -67,19 +67,26 @@ export function CommemorativeDatesTab() {
   }, []);
 
   const getFullDate = (d: CommemorativeDate, year = currentMonth.getFullYear()) => {
+    if (!d) return new Date();
     if (d.year_fixed) {
-      return new Date(year, d.month - 1, d.day);
+      return new Date(year, (d.month || 1) - 1, d.day || 1);
     } else if (d.mobile_id) {
       const occurrence = getMobileDateOccurrence(d.mobile_id, year);
-      return new Date(year, occurrence.month - 1, occurrence.day);
+      return new Date(year, (occurrence.month || 1) - 1, occurrence.day || 1);
     }
-    return new Date(year, d.month - 1, d.day);
+    return new Date(year, (d.month || 1) - 1, d.day || 1);
   };
 
   const filteredDates = useMemo(() => {
     return dates.filter(d => {
-      const matchesSearch = d.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          d.description.toLowerCase().includes(searchTerm.toLowerCase());
+      if (!d) return false;
+      const name = d.name || '';
+      const description = d.description || '';
+      const hashtags = Array.isArray(d.hashtags) ? d.hashtags.join(' ') : (typeof d.hashtags === 'string' ? d.hashtags : '');
+      
+      const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          hashtags.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = selectedCategory === 'all' || d.category === selectedCategory;
       return matchesSearch && matchesCategory;
     }).sort((a, b) => {
@@ -360,21 +367,55 @@ export function CommemorativeDatesTab() {
             </div>
             
             <div className="grid grid-cols-7 bg-slate-50/50">
-               {['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'].map(d => (
+               {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(d => (
                  <div key={d} className="p-4 text-center text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 border-r border-slate-100 last:border-0">{d}</div>
                ))}
             </div>
 
-            <div className="grid grid-cols-7 grid-rows-5 h-[600px]">
-               {/* Logic for generating calendar cells with markers for dates */}
-               {Array.from({ length: 35 }).map((_, i) => {
-                  const dayNum = i + 1; // Simplified calendar logic
-                  return (
-                    <div key={i} className="p-6 border-r border-b border-slate-50 relative group hover:bg-slate-50/30 transition-colors">
-                       <span className="text-xs font-black text-slate-300 group-hover:text-slate-900 transition-colors">{dayNum}</span>
-                    </div>
-                  );
-               })}
+            <div className="grid grid-cols-7 min-h-[600px]">
+               {(() => {
+                 const firstDay = startOfMonth(currentMonth);
+                 const lastDay = endOfMonth(currentMonth);
+                 const emptyDays = firstDay.getDay();
+                 const totalDays = lastDay.getDate();
+                 
+                 const cells = [];
+                 
+                 // Empty cells for alignment
+                 for (let i = 0; i < emptyDays; i++) {
+                   cells.push(<div key={`empty-${i}`} className="p-4 border-r border-b border-slate-50 bg-slate-50/20" />);
+                 }
+                 
+                 // Real days
+                 for (let d = 1; d <= totalDays; d++) {
+                   const cellDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), d);
+                   const dayEvents = dates.filter(date => {
+                     const occ = getFullDate(date, currentMonth.getFullYear());
+                     return occ.getDate() === d && occ.getMonth() === currentMonth.getMonth();
+                   });
+                   
+                   cells.push(
+                     <div key={d} className={`p-4 border-r border-b border-slate-50 relative group hover:bg-slate-50/30 transition-colors min-h-[120px] ${isToday(cellDate) ? 'bg-indigo-50/30' : ''}`}>
+                        <span className={`text-xs font-black transition-colors ${isToday(cellDate) ? 'text-indigo-600' : 'text-slate-300 group-hover:text-slate-900'}`}>{d}</span>
+                        
+                        <div className="mt-2 space-y-1">
+                          {dayEvents.map(event => (
+                            <div 
+                              key={event.id}
+                              className="px-2 py-1 rounded-md text-[7px] font-black uppercase tracking-tighter truncate text-white"
+                              style={{ backgroundColor: categories.find(c => c.id === event.category)?.color || '#000' }}
+                              title={event.name}
+                            >
+                              {event.name}
+                            </div>
+                          ))}
+                        </div>
+                     </div>
+                   );
+                 }
+                 
+                 return cells;
+               })()}
             </div>
           </motion.div>
         )}

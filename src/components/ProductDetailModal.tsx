@@ -292,9 +292,9 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className={`absolute bottom-8 left-1/2 -translate-x-1/2 px-8 py-4 ${theme.specialBtn} text-xs uppercase tracking-widest font-semibold rounded-2xl shadow-xl z-[100]`}
+              className="absolute bottom-8 left-1/2 -translate-x-1/2 px-8 py-4 bg-black text-white text-[10px] uppercase tracking-[0.2em] font-black rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[100] border border-white/10"
             >
-              Adicionado com sucesso
+              Adicionado ao Carrinho
             </motion.div>
           )}
           {showGiftToast && (
@@ -302,8 +302,9 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className={`absolute bottom-8 left-1/2 -translate-x-1/2 px-8 py-4 ${theme.specialBtn} text-xs uppercase tracking-widest font-semibold rounded-2xl shadow-xl z-[100]`}
+              className="absolute bottom-8 left-1/2 -translate-x-1/2 px-8 py-4 bg-black text-white text-[10px] uppercase tracking-[0.2em] font-black rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[100] border border-white/10 flex items-center gap-2"
             >
+              <Gift size={14} className="text-pink-400" />
               Adicionado à sua lista!
             </motion.div>
           )}
@@ -312,9 +313,9 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className={`absolute bottom-8 left-1/2 -translate-x-1/2 px-8 py-4 ${theme.specialBtn} text-xs uppercase tracking-widest font-semibold rounded-2xl shadow-xl z-[100]`}
+              className="absolute bottom-8 left-1/2 -translate-x-1/2 px-8 py-4 bg-black text-white text-[10px] uppercase tracking-[0.2em] font-black rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[100] border border-white/10"
             >
-              Link copiado!
+              Link copiado para partilhar!
             </motion.div>
           )}
         </AnimatePresence>

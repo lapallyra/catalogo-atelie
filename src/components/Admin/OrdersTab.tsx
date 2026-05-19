@@ -384,7 +384,7 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 onClick={(e) => e.stopPropagation()}
-                className="bg-white w-full max-w-5xl max-h-[85vh] overflow-y-auto rounded-[2.5rem] border border-[#F0E6D2] shadow-2xl p-10 relative scrollbar-hide"
+                className="bg-white w-full max-w-6xl max-h-[90vh] overflow-y-auto rounded-[2.5rem] border border-[#F0E6D2] shadow-2xl p-12 relative scrollbar-hide"
               >
                   <button onClick={() => setIsDetailOpen(null)} className="absolute top-8 right-8 p-3 rounded-full hover:bg-[#FDFBF9] text-[#A09898] transition-all"><X size={24}/></button>
 
