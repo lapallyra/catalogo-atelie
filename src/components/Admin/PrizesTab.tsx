@@ -178,11 +178,22 @@ export const PrizesTab: React.FC<{ companyId: CompanyId }> = ({ companyId }) => 
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                   <div className="space-y-2">
-                      <label className="text-[9px] font-black uppercase tracking-widest text-[#FF007F] ml-4">Tipo</label>
+                <div className="space-y-2">
+                   <label className="text-[9px] font-black uppercase tracking-widest text-[#FF007F] ml-4">Peso (Sorte)</label>
+                   <input 
+                     type="number"
+                     className="w-full bg-rose-50/30 border-2 border-transparent focus:border-rose-100 rounded-[2rem] px-8 py-4 outline-none text-sm font-bold text-slate-800 transition-all" 
+                     placeholder="1" 
+                     value={editingPrize?.weight || 1} 
+                     onChange={e => setEditingPrize({...editingPrize, weight: Number(e.target.value)})} 
+                   />
+                </div>
+
+                <div className="pt-4 border-t border-rose-50 opacity-40 hover:opacity-100 transition-opacity">
+                   <p className="text-[8px] font-black uppercase tracking-widest text-center mb-4">Configurações Avançadas</p>
+                   <div className="grid grid-cols-2 gap-4">
                       <select 
-                        className="w-full bg-rose-50/30 border-2 border-transparent focus:border-rose-100 rounded-[2rem] px-7 py-4 outline-none text-sm font-bold text-slate-800 transition-all appearance-none"
+                        className="w-full bg-rose-50/20 border border-rose-100 rounded-xl px-4 py-2 outline-none text-[10px] font-bold text-slate-800"
                         value={editingPrize?.type || 'special'}
                         onChange={e => setEditingPrize({...editingPrize, type: e.target.value as any})}
                       >
@@ -190,37 +201,13 @@ export const PrizesTab: React.FC<{ companyId: CompanyId }> = ({ companyId }) => 
                         <option value="product">🎁 Produto</option>
                         <option value="special">✨ Especial</option>
                       </select>
-                   </div>
-                   <div className="space-y-2">
-                      <label className="text-[9px] font-black uppercase tracking-widest text-[#FF007F] ml-4">Peso (Sorte)</label>
                       <input 
-                        type="number"
-                        className="w-full bg-rose-50/30 border-2 border-transparent focus:border-rose-100 rounded-[2rem] px-8 py-4 outline-none text-sm font-bold text-slate-800 transition-all" 
-                        placeholder="1" 
-                        value={editingPrize?.weight || 1} 
-                        onChange={e => setEditingPrize({...editingPrize, weight: Number(e.target.value)})} 
+                        className="w-full bg-rose-50/20 border border-rose-100 rounded-xl px-4 py-2 outline-none text-[10px] font-bold text-slate-800" 
+                        placeholder="Valor/Código" 
+                        value={editingPrize?.value || ''} 
+                        onChange={e => setEditingPrize({...editingPrize, value: e.target.value})} 
                       />
                    </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-[9px] font-black uppercase tracking-widest text-[#FF007F] ml-4">Valor/Código/Texto que o cliente verá</label>
-                  <input 
-                    className="w-full bg-rose-50/30 border-2 border-transparent focus:border-rose-100 rounded-[2rem] px-8 py-4 outline-none text-sm font-bold text-slate-800 transition-all" 
-                    placeholder="Ex: CUPOM10 ou Mimo físico na entrega" 
-                    value={editingPrize?.value || ''} 
-                    onChange={e => setEditingPrize({...editingPrize, value: e.target.value})} 
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-[9px] font-black uppercase tracking-widest text-[#FF007F] ml-4">URL Imagem ou Emoji</label>
-                  <input 
-                    className="w-full bg-rose-50/30 border-2 border-transparent focus:border-rose-100 rounded-[2rem] px-8 py-4 outline-none text-sm font-bold text-slate-800 transition-all" 
-                    placeholder="Ex: 🎁 ou https://imagem.png" 
-                    value={editingPrize?.image || ''} 
-                    onChange={e => setEditingPrize({...editingPrize, image: e.target.value})} 
-                  />
                 </div>
 
                 <button 

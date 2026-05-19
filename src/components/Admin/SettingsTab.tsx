@@ -140,7 +140,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ companyId }) => {
           { id: 'marketing', label: 'Pixel Facebook', icon: Facebook },
           { id: 'whatsapp', label: 'WhatsApp', icon: Phone },
           { id: 'receipt', label: 'Comprovantes', icon: FileText },
-          { id: 'roulette', label: 'Roleta de Brindes', icon: Gift },
         ].map(item => (
           <button
             key={item.id}
@@ -350,11 +349,10 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ companyId }) => {
              </div>
              
              <p className="text-[10px] uppercase font-black text-gray-400 tracking-widest leading-relaxed">
-               Estes valores globais serão usados pela Inteligência do Sistema na hora de sugerir o Preço de Venda do seus produtos baseando-se no tempo gasto e custo dos insumos.
+                Estes valores globais serão usados pela Inteligência do Sistema na hora de sugerir o Preço de Venda do seus produtos baseando-se no tempo gasto e custo dos insumos.
              </p>
 
-             
-             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+             <div className="space-y-12">
                 <DynamicPricingList 
                   title="Custos Fixos (Mensal)" 
                   subtitle="Água, luz, assinaturas, aluguel..."

@@ -123,7 +123,6 @@ function CompanyCatalogWrapper({ companyId, config, carts, setCart, giftLists, s
 
   return (
     <>
-      <SuggestionBox companyId={companyId} />
       <SalesNotificationPortal currentCompany={companyId} />
       <CatalogView
         companyId={companyId}

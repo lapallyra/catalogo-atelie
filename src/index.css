@@ -28,7 +28,8 @@ html {
 
 @layer utilities {
   .font-fancy {
-    font-family: var(--font-elegant);
+    font-family: var(--font-hand);
+    font-weight: 400;
   }
   .font-beauty {
     font-family: 'Beauty', 'Great Vibes', cursive;

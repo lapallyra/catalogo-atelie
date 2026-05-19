@@ -5,7 +5,6 @@ import { AppConfig, CompanyId, SiteSettings } from '../types';
 import { login } from '../lib/firebase';
 import { useAuth } from './AuthProvider';
 import { subscribeToAllSettings } from '../services/firebaseService';
-import { SuggestionBox } from './SuggestionBox';
 import { themes } from '../lib/theme';
 import { useNavigate } from 'react-router-dom';
 import { ImageWithFallback } from './ImageWithFallback';

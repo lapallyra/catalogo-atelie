@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingBag, Search, Gift } from 'lucide-react';
+import { ShoppingCart, Search, Gift } from 'lucide-react';
 import { BotaoVoltar } from '../BotaoVoltar';
 import { CompanyId } from '../../types';
 import { FestiveBanner } from './FestiveBanner';
